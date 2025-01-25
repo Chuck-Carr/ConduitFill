@@ -13,8 +13,10 @@ const ConduitSpaceCalculator = () => {
 
     // Define conduit diameters based on selection
     const conduitDiameters: Record<string, number> = {
-      '1': 1.315,  // 1" Conduit
-      '3/4': 1.050,  // 3/4" Conduit
+      
+      '1/2': 0.622,  // 1/2" Conduit
+      '1': 1.049,    // 1" Conduit
+      '3/4': 0.824   // 3/4" Conduit
     };
 
     // Calculate area of conduit
@@ -49,6 +51,7 @@ const ConduitSpaceCalculator = () => {
       >
         <Picker.Item label="1 Inch" value="1" />
         <Picker.Item label="3/4 Inch" value="3/4" />
+        <Picker.Item label="1/2 Inch" value="1/2" />
       </Picker>
 
       <Button title="Calculate" onPress={handleCalculate} />
