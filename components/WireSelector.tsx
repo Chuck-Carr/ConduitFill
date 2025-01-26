@@ -13,8 +13,11 @@ interface Manufacturer {
   name: string;
   wires: Wire[];
 }
+interface WireSelectorProps {
+  setWireDiameters: (diameters: number[]) => void;  // Type the prop as a function that takes an array of numbers
+}
 
-const WireSelector = () => {
+const WireSelector: React.FC<WireSelectorProps> = ({ setWireDiameters }) => {
   const [selectedWires, setSelectedWires] = useState<{ [wireId: string]: number }>({});
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -177,7 +180,33 @@ const WireSelector = () => {
         </View>
       )}
 
-      <Button  title="Submit" onPress={() => console.log(selectedWires)} />
+
+      {/* <Button  title="Submit" onPress={() => console.log(selectedWires)} /> */}
+      <Button 
+  title="Submit" 
+  onPress={() => {
+    // Map over the selected wires and repeat the outer diameter based on the quantity
+    const selectedWireDiameters = Object.keys(selectedWires)
+      .flatMap((wireId) => {
+        const wire = manufacturers
+          .flatMap((manufacturer) => manufacturer.wires)
+          .find((wire) => wire.id === wireId); // Find the wire by ID
+
+        const quantity = selectedWires[wireId];
+        // Convert the outer_diameter_in (string) to a number before returning it
+        return wire ? Array(quantity).fill(parseFloat(wire.outer_diameter_in)) : []; // Convert to number
+      })
+      .filter((diameter): diameter is number => !isNaN(diameter)); // Filter out invalid numbers
+  
+    // Pass the wire diameters (as numbers) to the parent via setWireDiameters
+    setWireDiameters(selectedWireDiameters);
+    console.log(selectedWireDiameters); // Logging to check the output
+  }} 
+/>
+
+
+
+
       <Button title="Reset" onPress={clearAllSelections} color="red" />
     </View>
   );

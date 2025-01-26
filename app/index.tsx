@@ -1,20 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, Button, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import WireSelector  from '../components/WireSelector'
-
+import WireSelector from '../components/WireSelector';
 
 const ConduitSpaceCalculator = () => {
-  const [wireDiameters, setWireDiameters] = useState('');
+  const [wireDiameters, setWireDiameters] = useState<number[]>([]); // wireDiameters is an array of numbers
   const [conduitSize, setConduitSize] = useState<string>('1');
   const [result, setResult] = useState<number | null>(null);
 
   const handleCalculate = () => {
-    const wireDiametersArray = wireDiameters.split(',').map(d => parseFloat(d.trim()));
-
-    // Define conduit diameters based on selection
+    // Define conduit diameters
     const conduitDiameters: Record<string, number> = {
-      
       '1/2': 0.622,  // 1/2" Conduit
       '1': 1.049,    // 1" Conduit
       '3/4': 0.824   // 3/4" Conduit
@@ -25,7 +21,7 @@ const ConduitSpaceCalculator = () => {
 
     // Calculate total wire area
     let totalWireArea = 0;
-    wireDiametersArray.forEach(diameter => {
+    wireDiameters.forEach(diameter => {
       totalWireArea += Math.PI * Math.pow(diameter / 2, 2);
     });
 
@@ -38,19 +34,13 @@ const ConduitSpaceCalculator = () => {
 
   return (
     <View style={styles.container}>
+      {/* WireSelector handles the wire diameters */}
+      <WireSelector setWireDiameters={setWireDiameters} />
 
-      <WireSelector />
-      {/* <Text>Enter Wire Diameters (comma-separated):</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="e.g. 0.2, 0.3, 0.5"
-        value={wireDiameters}
-        onChangeText={setWireDiameters}
-      />
       <Text>Select Conduit Size:</Text>
       <Picker
         selectedValue={conduitSize}
-        onValueChange={(itemValue: string) => setConduitSize(itemValue)}  // Explicitly typing this as string
+        onValueChange={(itemValue: string) => setConduitSize(itemValue)}
       >
         <Picker.Item label="1 Inch" value="1" />
         <Picker.Item label="3/4 Inch" value="3/4" />
@@ -61,7 +51,7 @@ const ConduitSpaceCalculator = () => {
 
       {result !== null && (
         <Text style={styles.resultText}>Percentage of Space Used: {result}%</Text>
-      )} */}
+      )}
     </View>
   );
 };
@@ -69,16 +59,8 @@ const ConduitSpaceCalculator = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // justifyContent: 'center',
     padding: 20,
-    backgroundColor: "#2C3E50"
-  },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 10,
-    paddingLeft: 8,
+    backgroundColor: "#2C3E50",
   },
   resultText: {
     marginTop: 20,
