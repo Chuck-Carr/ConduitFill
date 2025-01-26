@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import WireSelector  from '../components/WireSelector'
 
 
 const ConduitSpaceCalculator = () => {
@@ -37,7 +38,9 @@ const ConduitSpaceCalculator = () => {
 
   return (
     <View style={styles.container}>
-      <Text>Enter Wire Diameters (comma-separated):</Text>
+
+      <WireSelector />
+      {/* <Text>Enter Wire Diameters (comma-separated):</Text>
       <TextInput
         style={styles.input}
         placeholder="e.g. 0.2, 0.3, 0.5"
@@ -58,7 +61,7 @@ const ConduitSpaceCalculator = () => {
 
       {result !== null && (
         <Text style={styles.resultText}>Percentage of Space Used: {result}%</Text>
-      )}
+      )} */}
     </View>
   );
 };
@@ -66,8 +69,9 @@ const ConduitSpaceCalculator = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    // justifyContent: 'center',
     padding: 20,
+    backgroundColor: "#2C3E50"
   },
   input: {
     height: 40,

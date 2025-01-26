@@ -1,0 +1,30 @@
+[
+      {
+        "manufacturer_id": 100,
+        "name": "Windy City",
+        "wires": [
+          { "id": "WC-1", "wire_type": "12-2 FPLP", "outer_diameter_in": ".238" },
+          { "id": "WC-2", "wire_type": "14-2 FPLP", "outer_diameter_in": ".206" },
+          { "id": "WC-3", "wire_type": "14-4 FPLP", "outer_diameter_in": ".242" },
+          { "id": "WC-4", "wire_type": "16-2 FPLP", "outer_diameter_in": ".178" },
+          { "id": "WC-5", "wire_type": "16-4 FPLP", "outer_diameter_in": ".208" },
+          { "id": "WC-6", "wire_type": "18-2 FPLP", "outer_diameter_in": ".158" },
+          { "id": "WC-7", "wire_type": "18-4 FPLP", "outer_diameter_in": ".184" }
+        ]
+      },
+      {
+        "manufacturer_id": 200,
+        "name": "Genesis",
+        "wires": [
+          { "id": "GEN-1", "wire_type": "14-2 FPLP", "outer_diameter_in": ".206" },
+          { "id": "GEN-2", "wire_type": "12-2 FPLP", "outer_diameter_in": ".228" },
+          { "id": "GEN-3", "wire_type": "14-4 FPLP", "outer_diameter_in": ".230" },
+          { "id": "GEN-4", "wire_type": "16-4 FPLP", "outer_diameter_in": ".201" },
+          { "id": "GEN-5", "wire_type": "16-2 FPLP", "outer_diameter_in": ".177" },
+          { "id": "GEN-6", "wire_type": "18-4 FPLP", "outer_diameter_in": ".157" },
+          { "id": "GEN-7", "wire_type": "18-2 FPLP", "outer_diameter_in": ".136" }
+        ]
+      }
+    ]
+
+  
