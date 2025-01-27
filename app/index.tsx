@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Modal, ScrollView, StatusBar } from 'react-native';
 import wiresData from '../assets/wiresData.json'; // Adjust path as needed
 
 interface Wire {
@@ -97,25 +97,10 @@ const ConduitSpaceCalculator = () => {
 
   return (
     <View style={styles.container}>
-      {/* Conduit Size Buttons */}
-      <View style={styles.conduitSizeButtons}>
-        {['1/2', '3/4', '1'].map((size) => (
-          <TouchableOpacity
-            key={size}
-            style={[
-              styles.conduitButton,
-              conduitSize === size && styles.selectedConduitButton
-            ]}
-            onPress={() => setConduitSize(size as '1/2' | '1' | '3/4')}
-          >
-            <Text style={styles.conduitButtonText}>{size} Inch</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
 
       {/* Modal for selecting wires */}
       <TouchableOpacity style={styles.addWireButton} onPress={openModal}>
-        <Text>Add Cable</Text>
+        <Text style={styles.addCableText}>Add Cable</Text>
       </TouchableOpacity>
       <Modal
         visible={modalVisible}
@@ -149,7 +134,9 @@ const ConduitSpaceCalculator = () => {
                   ))
                 : <Text>No wires available.</Text>}
             </ScrollView>
-            <Button title="Confirm" onPress={closeModal} />
+            <TouchableOpacity style={styles.confirmButton}>
+              <Button title="Confirm" onPress={closeModal} />
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -193,8 +180,24 @@ const ConduitSpaceCalculator = () => {
           Conduit Space Used: {result}%
         </Text>
       )}
-
-      <Button title="Reset" onPress={clearAllSelections} color="red" />
+      
+      <View style={styles.conduitSizeButtons}>
+        {['1/2', '3/4', '1'].map((size) => (
+          <TouchableOpacity
+            key={size}
+            style={[
+              styles.conduitButton,
+              conduitSize === size && styles.selectedConduitButton
+            ]}
+            onPress={() => setConduitSize(size as '1/2' | '1' | '3/4')}
+          >
+            <Text style={styles.conduitButtonText}>{size}" EMT</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      <TouchableOpacity style={styles.resetButton}>
+        <Button title="Reset" onPress={clearAllSelections} color="red" />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -214,6 +217,7 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#7F8C8D',
     borderRadius: 5,
+    marginTop: 5,
   },
   selectedConduitButton: {
     backgroundColor: '#16A085',
@@ -225,13 +229,26 @@ const styles = StyleSheet.create({
   addWireButton: {
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "dodgerblue",
+    backgroundColor: "#007BFF",
     width: 100,
     height: 40,
     borderRadius: 20,
     marginLeft: "auto",
     marginRight: "auto",
-    marginBottom: 20,
+    marginBottom: -5,
+    marginTop: 10,
+  },
+    addCableText: {
+      color: "#fff"
+
+  },
+    confirmButton: {
+      backgroundColor: "#d3d3d3",
+      width: 100,
+      alignSelf: "center",
+      borderRadius: 5,
+      marginTop: 10,
+      marginBottom: -10,
   },
   selectedWireItem: {
     flexDirection: 'row',
@@ -240,10 +257,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+    borderRadius: 20,
+    marginBottom: 5,
   },
   selectedWireContent: {
     flexDirection: 'column',
-    justifyContent: 'center',
   },
   selectedWireText: {
     fontSize: 16,
@@ -254,10 +272,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
     marginTop: 5,
+    marginLeft: 10,
   },
   quantityButtons: {
     flexDirection: 'row',
-    alignItems: 'center',
+    flex: .45,
+    justifyContent: "space-between",
+    marginLeft: 20,
+    marginRight: 20,
   },
   manufacturerContainer: {
     marginBottom: 15,
@@ -272,10 +294,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#007BFF',
     paddingVertical: 5,
+    paddingLeft: 5,
   },
   selectedText: {
     fontWeight: 'bold',
-    color: '#28A745',
+    color: "#fff",
+    backgroundColor: "#007BFF",
+    borderRadius: 5,
   },
   modalContainer: {
     flex: 1,
@@ -299,6 +324,7 @@ const styles = StyleSheet.create({
   },
   selectedWiresContainer: {
     marginTop: 20,
+    height: "70%",
   },
   selectedTitle: {
     fontSize: 18,
@@ -307,12 +333,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   percentageText: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: '600',
     color: '#fff',
     textAlign: 'center',
     marginTop: 20,
+    marginBottom: 20,
   },
+  resetButton: {
+    backgroundColor: "white",
+    width: 150,
+    borderRadius: 5,
+    marginLeft: "auto",
+    marginRight: "auto",
+  }
 });
 
 export default ConduitSpaceCalculator;
