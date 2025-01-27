@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import wiresData from '../assets/wiresData.json';  // Adjust path as needed
 
@@ -13,14 +13,23 @@ interface Manufacturer {
   name: string;
   wires: Wire[];
 }
+
 interface WireSelectorProps {
   setWireDiameters: (diameters: number[]) => void;  // Type the prop as a function that takes an array of numbers
+  conduitSize: string;  // Add conduitSize to props
 }
 
-const WireSelector: React.FC<WireSelectorProps> = ({ setWireDiameters }) => {
+const WireSelector: React.FC<WireSelectorProps> = ({ setWireDiameters, conduitSize }) => {
   const [selectedWires, setSelectedWires] = useState<{ [wireId: string]: number }>({});
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [percentageUsed, setPercentageUsed] = useState<number | null>(null);
+
+  const conduitDiameters = {
+    '1/2': 0.622,  // 1/2" Conduit
+    '1': 1.049,    // 1" Conduit
+    '3/4': 0.824   // 3/4" Conduit
+  };
 
   // Load and flatten wires data
   useEffect(() => {
@@ -62,29 +71,36 @@ const WireSelector: React.FC<WireSelectorProps> = ({ setWireDiameters }) => {
     setSelectedWires(newSelection);
   };
 
-  // Render wire items in the modal
-  const renderWireItem = (wire: Wire) => {
-    const isSelected = selectedWires[wire.id] !== null;
-    const quantity = selectedWires[wire.id] || 0;
+  // Perform the calculation for the conduit space usage
+  const calculateConduitUsage = useCallback(() => {
+    const conduitDiameter = conduitDiameters[conduitSize as keyof typeof conduitDiameters];
+    if (!conduitDiameter) return;
 
-    return (
-      <View style={styles.item} key={wire.id}>
-        <TouchableOpacity onPress={() => handleWireSelection(wire.id)}>
-          <Text style={[styles.wireText, isSelected ? styles.selectedText : null]}>
-            {wire.wire_type}
-          </Text>
-        </TouchableOpacity>
+    // Calculate area of conduit
+    const conduitArea = Math.PI * Math.pow(conduitDiameter / 2, 2);
 
-        {isSelected && (
-          <View style={styles.quantityContainer}>
-            <Button title={`-1`} onPress={() => handleDecrement(wire.id)} color="#F44336" />
-            <Text style={styles.quantityText}>Quantity: {quantity}</Text>
-            <Button title={`+1`} onPress={() => handleIncrement(wire.id)} color="#4CAF50" />
-          </View>
-        )}
-      </View>
-    );
-  };
+    // Calculate total wire area
+    let totalWireArea = 0;
+    Object.keys(selectedWires).forEach((wireId) => {
+      const wire = manufacturers
+        .flatMap((manufacturer) => manufacturer.wires)
+        .find((wire) => wire.id === wireId);
+      if (wire) {
+        const wireDiameter = parseFloat(wire.outer_diameter_in);
+        totalWireArea += Math.PI * Math.pow(wireDiameter / 2, 2) * selectedWires[wireId]; // Multiply by quantity
+      }
+    });
+
+    // Calculate percentage usage
+    const percentageUsed = (totalWireArea / conduitArea) * 100;
+
+    setPercentageUsed(parseFloat(percentageUsed.toFixed(2)));
+  }, [conduitSize, selectedWires, manufacturers]);
+
+  // Trigger calculation when wires are selected or conduit size changes
+  useEffect(() => {
+    calculateConduitUsage();
+  }, [calculateConduitUsage]);
 
   // Render selected wire items with quantity control
   const renderSelectedWireItem = (wire: Wire & { quantity: number }) => {
@@ -109,14 +125,15 @@ const WireSelector: React.FC<WireSelectorProps> = ({ setWireDiameters }) => {
   // Clear all selections
   const clearAllSelections = () => {
     setSelectedWires({});
+    setPercentageUsed(null); // Reset percentage
   };
+
   const openModal = () => setModalVisible(true);
   const closeModal = () => setModalVisible(false);
 
   return (
     <View style={styles.container}>
       {/* Add Wires button to open the modal */}
-      {/* <Button title="Add Wires" onPress={() => setModalVisible(true)} /> */}
       <TouchableOpacity style={styles.addWireButton} onPress={openModal}>
         <Text>Add Cable</Text>
       </TouchableOpacity>
@@ -142,7 +159,7 @@ const WireSelector: React.FC<WireSelectorProps> = ({ setWireDiameters }) => {
                             <Text
                               style={[
                                 styles.wireText,
-                                selectedWires[wire.id] ? styles.selectedText: null,
+                                selectedWires[wire.id] ? styles.selectedText : null,
                               ]}
                             >
                               {wire.wire_type} - {wire.outer_diameter_in} in
@@ -168,44 +185,23 @@ const WireSelector: React.FC<WireSelectorProps> = ({ setWireDiameters }) => {
               .map((wireId) => {
                 const wire = manufacturers
                   .flatMap((manufacturer) => manufacturer.wires)
-                  .find((wire) => wire.id === wireId); // wire.id is a string, no need to parse
-
+                  .find((wire) => wire.id === wireId);
                 // Only return the wire if found, otherwise skip
                 return wire ? { ...wire, quantity: selectedWires[wireId] } : undefined;
               })
-              .filter((wire): wire is Wire & { quantity: number } => wire !== undefined)} // Type guard to filter out undefined
+              .filter((wire): wire is Wire & { quantity: number } => wire !== undefined)}
             renderItem={({ item }) => renderSelectedWireItem(item)}
             keyExtractor={(item) => item.id} // wire.id is already a string, no need to convert
           />
         </View>
       )}
 
-
-      {/* <Button  title="Submit" onPress={() => console.log(selectedWires)} /> */}
-      <Button 
-  title="Submit" 
-  onPress={() => {
-    // Map over the selected wires and repeat the outer diameter based on the quantity
-    const selectedWireDiameters = Object.keys(selectedWires)
-      .flatMap((wireId) => {
-        const wire = manufacturers
-          .flatMap((manufacturer) => manufacturer.wires)
-          .find((wire) => wire.id === wireId); // Find the wire by ID
-
-        const quantity = selectedWires[wireId];
-        // Convert the outer_diameter_in (string) to a number before returning it
-        return wire ? Array(quantity).fill(parseFloat(wire.outer_diameter_in)) : []; // Convert to number
-      })
-      .filter((diameter): diameter is number => !isNaN(diameter)); // Filter out invalid numbers
-  
-    // Pass the wire diameters (as numbers) to the parent via setWireDiameters
-    setWireDiameters(selectedWireDiameters);
-    console.log(selectedWireDiameters); // Logging to check the output
-  }} 
-/>
-
-
-
+      {/* Show percentage used */}
+      {percentageUsed !== null && (
+        <Text style={styles.percentageText}>
+          Conduit Space Used: {percentageUsed}%
+        </Text>
+      )}
 
       <Button title="Reset" onPress={clearAllSelections} color="red" />
     </View>
@@ -230,152 +226,88 @@ const styles = StyleSheet.create({
     marginLeft: "auto",
     marginRight: "auto",
     marginBottom: 20,
-
   },
-  item: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0', // Light gray border for soft separation
-    paddingBottom: 15,
-  },
-  wireText: {
+  percentageText: {
     fontSize: 18,
-    color: '#333333', // Dark charcoal gray for primary text
     fontWeight: '600',
-    paddingVertical: 12,
-    flex: 1,
-  },
-  selectedText: {
-    backgroundColor: '#00B8A9',  // Muted teal for selected wire items
-    color: '#FFFFFF',  // White text for contrast
-    borderRadius: 20,
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    fontWeight: '700',
-    fontSize: 16,
-  },
-  quantityContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 12,
-  },
-  quantityText: {
-    fontSize: 16,
-    marginHorizontal: 15,
-    color: '#333333', // Dark charcoal gray for quantity text
-    fontWeight: '500',
-  },
-  modalContainer: {
-    flex: 1,
-    marginTop: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Dark overlay for modal background
-  },
-  modalContent: {
-    width: '90%',
-    padding: 25,
-    backgroundColor: '#FFFFFF', // White background for modal content
-    borderRadius: 15,
-    elevation: 6,  // Shadow for depth
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    flex: 1,
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333333', // Dark charcoal gray for modal title
+    color: '#333',
     textAlign: 'center',
-  },
-  scrollView: {
-    width: '100%',
-  },
-  manufacturerContainer: {
-    marginBottom: 25,
-  },
-  manufacturerName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#FF8B8B', // Pastel pink for manufacturer names to create visual interest
-  },
-  selectedWiresContainer: {
-    marginTop: 30,
-  },
-  selectedTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#333333', // Dark charcoal gray for selected wire title
+    marginTop: 20,
   },
   selectedWireItem: {
-    marginBottom: 20,
     flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15,
-    borderRadius: 12,
-    backgroundColor: 'white', // Light pastel orange for selected wire items
+    justifyContent: 'space-between',
+    padding: 10,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
   selectedWireContent: {
-    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
   },
   selectedWireText: {
     fontSize: 16,
-    color: '#333333', // Dark charcoal gray for wire details text
+    fontWeight: '600',
+    color: '#333',
+  },
+  quantityText: {  // Add this missing style
+    fontSize: 14,
+    color: '#555',
+    marginTop: 5,
   },
   quantityButtons: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginLeft: 15,
-    width: 120,
   },
-  button: {
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 30,
-    backgroundColor: '#00B8A9',  // Muted teal for action buttons
-    alignItems: 'center',
+  manufacturerContainer: {
+    marginBottom: 15,
+  },
+  manufacturerName: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 10,
+  },
+  wireText: {
+    fontSize: 16,
+    color: '#007BFF',
+    paddingVertical: 5,
+  },
+  selectedText: {
+    fontWeight: 'bold',
+    color: '#28A745',
+  },
+  modalContainer: {
+    flex: 1,
     justifyContent: 'center',
-  },
-  buttonText: {
-    fontSize: 16,
-    color: '#FFFFFF', // White text for buttons
-    fontWeight: '600',
-  },
-  closeButton: {
-    backgroundColor: '#FFB86C',  // Light pastel orange for cancel button
-  },
-  resetButton: {
-    backgroundColor: '#FFB86C',  // Light pastel orange for reset button
-  },
-  submitButton: {
-    backgroundColor: '#00B8A9',  // Muted teal for submit button
-    fontSize: 40,
-  },
-  modalButton: {
-    marginTop: 12,
-    paddingVertical: 12,
-    backgroundColor: '#FF8B8B',  // Pastel pink for modal confirm button
-    borderRadius: 6,
-    width: '100%',
     alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  modalButtonText: {
-    fontSize: 16,
+  modalContent: {
+    width: '80%',
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 15,
+  },
+  scrollView: {
+    maxHeight: 300,
+  },
+  selectedWiresContainer: {
+    marginTop: 20,
+  },
+  selectedTitle: {
+    fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF', // White text for modal buttons
+    color: '#333',
+    marginBottom: 10,
   },
 });
-
-
-
 
 
 export default WireSelector;
