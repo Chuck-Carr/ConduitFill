@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "ConduitSpaceCalculator",
-    "slug": "ConduitSpaceCalculator",
+    "slug": "conduitfill",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -9,13 +9,15 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.chuck.carr4.conduitfill"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.chuck.carr4.conduitfill"
     },
     "web": {
       "bundler": "metro",
@@ -36,6 +38,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "934360d5-a349-4c17-8655-db0ed7f0ea54"
+      }
+    },
+    "owner": "chuck.carr4"
   }
 }

@@ -125,7 +125,7 @@ const ConduitSpaceCalculator = () => {
                                 selectedWires[wire.id] ? styles.selectedText : null,
                               ]}
                             >
-                              {wire.wire_type} - {wire.outer_diameter_in} in
+                              {wire.wire_type}
                             </Text>
                           </TouchableOpacity>
                         </View>
@@ -159,7 +159,7 @@ const ConduitSpaceCalculator = () => {
               <View style={styles.selectedWireItem} key={item.id}>
                 <View style={styles.selectedWireContent}>
                   <Text style={styles.selectedWireText}>
-                    {item.wire_type} - {item.outer_diameter_in} in
+                    {item.wire_type}
                   </Text>
                   <Text style={styles.quantityText}>Quantity: {item.quantity}</Text>
                 </View>
@@ -207,6 +207,9 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: "#2C3E50",
+    justifyContent: "center",
+
+
   },
   conduitSizeButtons: {
     flexDirection: 'row',
