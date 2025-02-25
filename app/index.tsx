@@ -22,11 +22,11 @@ interface Manufacturer {
 
 const ConduitSpaceCalculator: React.FC = () => {
   const [selectedWires, setSelectedWires] = useState<{ [key: string]: number }>({});
-  const [conduitSize, setConduitSize] = useState<'3' | '2 1/2' | '2' | '1 1/2' | '1 1/4' | '1' | '3/4'>('1');
+  const [conduitSize, setConduitSize] = useState<'3' | '2 1/2' | '2' | '1 1/2' | '1 1/4' | '1' | '3/4' | '1/2' >('1');
   const [result, setResult] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const conduitDiameters: Record<'3' | '2 1/2' | '2' | '1 1/2' | '1 1/4' | '1' | '3/4', number> = {
+  const conduitDiameters: Record<'3' | '2 1/2' | '2' | '1 1/2' | '1 1/4' | '1' | '3/4' | '1/2', number> = {
     '3': 3.068,
     '2 1/2': 2.469,
     '2': 2.067,
@@ -34,6 +34,7 @@ const ConduitSpaceCalculator: React.FC = () => {
     '1 1/4': 1.380,
     '1': 1.049,
     '3/4': 0.824,
+    '1/2': 0.622,
   };
 
   const handleCalculate = useCallback(() => {
